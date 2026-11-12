@@ -1,4 +1,4 @@
-const { ventas } = require('./datos.js');
+const { ventas } = require('./datos')
 
 const valorVenta = (venta) => {
         return venta.cantidad * venta.precio;
@@ -56,7 +56,6 @@ const normalizarPalabra = palabra => {
     return palabraNormalizada;
 }
 
-
 const ventasPorCiudad = (ventas, ciudad) => {
     let cantidadVentas = 0;
     for (const venta of ventas) {
@@ -67,6 +66,100 @@ const ventasPorCiudad = (ventas, ciudad) => {
     return cantidadVentas;
 }
 
+const totalVendidoM = ventas.reduce((acc, venta) => acc += (venta.cantidad * venta.precio), 0) 
+
+const unidadesVendidasM = ventas.reduce((acc, venta) => acc += venta.cantidad , 0)
+
+const ventasPorCiudadM = (ventas, ciudad) => {
+    return ventas.filter(venta => normalizarPalabra(venta.ciudad) === normalizarPalabra(ciudad)).reduce((acc, venta) => acc + valorVenta(venta), 0);
+}
+
+const totalPorCiudad = ventas.reduce((acc, venta) => {
+    if (!(normalizarPalabra(venta.ciudad) in acc)){
+        acc[normalizarPalabra(venta.ciudad)] = 0
+    }
+    acc[normalizarPalabra(venta.ciudad)] += valorVenta(venta)
+    return acc
+},{})
+
+const unidadesPorProducto = ventas.reduce((acc, venta) => {
+    if(!(normalizarPalabra(venta.producto) in acc)){
+        acc[normalizarPalabra(venta.producto)] = 0;
+    }
+    acc[normalizarPalabra(venta.producto)] += venta.cantidad
+    return acc
+},{})
+
+
+const topProductosPorvalor = (ventas, k=3) => {
+    return Object.entries(
+        ventas.reduce((acc, venta) => {
+            if(!(normalizarPalabra(venta.producto) in acc)){
+                acc[normalizarPalabra(venta.producto)] = 0;
+            }
+            acc[normalizarPalabra(venta.producto)] += valorVenta(venta);
+            return acc
+        }, {})
+    )
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, k);
+}
+
+
+console.log(topProductosPorvalor(ventas));
+
+
+
+
+
+module.exports = {
+    totalVendido,
+    totalVendidoM,
+    unidadesVendidas,
+    unidadesVendidasM,
+    ventasPorCiudad,
+    ventasPorCiudadM,
+};
+
+
+
+//console.log(totalPorCiudad)
+
+const productosFijos = ventas.map(venta => venta.producto)
+const ciudadesFijos = ventas.map(venta => venta.ciudades)
+const preciosFijos = ventas.map(venta => venta.precios)
+/*
+const clientesFijos = ventas.map(venta => venta.cliente)
+const clientesFijosA = ventas.reduce((acc, venta) => {
+    if (acc.lenght <= 3 && !(acc.includes(venta.cliente))){
+        acc = acc + venta.cliente
+    }
+    return acc
+}
+,[])
+
+
+console.log(clientesFijosA)
+console.log(clientesFijos)
+*/
+/*const generarClienteAleatorio = staticClients.map(cliente => {
+    let arregloClienteAleatorios = []
+    for (let i = 1; i < 3; index++) {
+
+    }
+},[])*/
+/*
+const generarVentas = (numerosRandoms) => {
+    const ventasGeneradas = [
+        Object.keys(...ventas) 
+    ];
+    return ventasGeneradas;
+} 
+
+console.log(Object.keys(...ventas) );
+*/
+
+/*
 
 console.log(valorVenta(ventas[10]));
 console.log(totalVendido(ventas));
@@ -83,7 +176,10 @@ console.log(Math.round(ticketPromedio(ventas)));
 console.log("\nVentas por ciudad: ");
 console.log(ventasPorCiudad(ventas, "MedelLiN"));
 
-console.log("<=======================================================>")
+
+
+
+("<=======================================================>")
 console.log("\n--- Pruebas valorVenta ---");
 console.log("Venta del arreglo:", valorVenta(ventas[0]));
 console.log("Otra venta:", valorVenta(ventas[1]));
@@ -112,4 +208,5 @@ console.log("Arreglo vacío:", ticketPromedio([]));
 console.log("\n--- Pruebas ventasPorCiudad ---");
 console.log("Arreglo completo:", ventasPorCiudad(ventas, "Medellín"));
 console.log("Un elemento:", ventasPorCiudad([ventas[0]], "Medellín"));
-console.log("Arreglo vacío:", ventasPorCiudad([], "Medellín"));
+console.log("Arreglo vacío:", ventasPorCiudad([], "Medellín")); 
+*/

@@ -401,3 +401,128 @@ Venta	Ciudad	Valor venta	¿Coincide?	Total acumulado
 Prueba 2: un solo elemento
 Venta	Ciudad	Valor venta	¿Coincide?	Total acumulado
 1	Medellín	84.000	Sí	84.000
+
+MINIRETO 2 SEMANA 1 ======================================================
+
+MINIRETO 3 – SEMANA 1
+Análisis de las funciones con métodos de arreglos
+1. totalVendidoM(ventas)
+¿Qué recorro?
+
+Recorro todas las ventas del arreglo mediante reduce().
+
+¿Qué filtro?
+
+No aplico ningún filtro. Se procesan todos los registros.
+
+¿Qué transformo?
+
+No transformo los registros. Calculo el valor de cada venta multiplicando la cantidad por el precio unitario.
+
+¿Qué acumulo?
+
+Acumulo el valor monetario de todas las ventas.
+
+¿Cómo agrupo?
+
+No agrupo los registros. Utilizo un único acumulador que almacena el total vendido.
+2. unidadesVendidasM(ventas)
+¿Qué recorro?
+
+Recorro todas las ventas del arreglo mediante reduce().
+
+¿Qué filtro?
+
+No aplico ningún filtro. Se tienen en cuenta todos los registros.
+
+¿Qué transformo?
+
+Obtengo la cantidad de unidades de cada venta.
+
+¿Qué acumulo?
+
+Acumulo las unidades vendidas de todos los registros.
+
+¿Cómo agrupo?
+
+No agrupo por ninguna categoría. Utilizo un único acumulador para obtener el total de unidades.
+3. ventasPorCiudadM(ventas, ciudad)
+¿Qué recorro?
+
+Recorro todas las ventas mediante filter() para revisar a qué ciudad pertenece cada registro.
+
+¿Qué filtro?
+
+Filtro las ventas cuya ciudad coincide con la ciudad recibida como parámetro. Para realizar la comparación, normalizo ambos textos y evito diferencias por mayúsculas, minúsculas y tildes.
+
+¿Qué transformo?
+
+No transformo los registros en otra estructura. Después de filtrarlos, calculo el valor monetario de cada venta mediante valorVenta().
+
+¿Qué acumulo?
+
+Acumulo el valor monetario de las ventas que pertenecen a la ciudad buscada, utilizando reduce().
+
+¿Cómo agrupo?
+
+No realizo una agrupación por varias ciudades. Selecciono una ciudad específica y sumo sus ventas.
+4. totalPorCiudad(ventas)
+¿Qué recorro?
+
+Recorro todas las ventas del arreglo mediante reduce().
+
+¿Qué filtro?
+
+No aplico un filtro para excluir ciudades. Se procesan todos los registros.
+
+¿Qué transformo?
+
+Transformo el nombre de cada ciudad mediante normalizarPalabra() para obtener una clave uniforme y evitar categorías duplicadas por diferencias en la escritura.
+
+¿Qué acumulo?
+
+Acumulo el valor monetario de las ventas correspondientes a cada ciudad.
+
+¿Cómo agrupo?
+
+Agrupo las ventas mediante un objeto acumulador. Cada ciudad normalizada se convierte en una propiedad del objeto y almacena la suma de sus ventas.
+5. unidadesPorProducto(ventas)
+¿Qué recorro?
+
+Recorro todas las ventas del arreglo mediante reduce().
+
+¿Qué filtro?
+
+No aplico ningún filtro. Se procesan todos los registros.
+
+¿Qué transformo?
+
+Normalizo el nombre de cada producto para utilizarlo como clave y evitar que diferencias en mayúsculas, minúsculas o tildes generen categorías duplicadas.
+
+¿Qué acumulo?
+
+Acumulo la cantidad de unidades vendidas de cada producto.
+
+¿Cómo agrupo?
+
+Agrupo las ventas mediante un objeto acumulador. Cada producto normalizado se convierte en una propiedad que almacena la cantidad total de unidades vendidas.
+6. topProductosPorValor(ventas, k)
+¿Qué recorro?
+
+Recorro todas las ventas del arreglo mediante reduce().
+
+¿Qué filtro?
+
+No aplico un filtro sobre las ventas. Sin embargo, valido que el parámetro k sea un número entero mayor que cero. Al final, selecciono únicamente los primeros k productos.
+
+¿Qué transformo?
+
+Normalizo el nombre de cada producto para utilizarlo como clave. Después, utilizo Object.entries() para convertir el objeto de agrupación en un arreglo de pares que contienen el nombre del producto y el dinero generado.
+
+¿Qué acumulo?
+
+Acumulo el valor monetario de las ventas correspondientes a cada producto.
+
+¿Cómo agrupo?
+
+Agrupo las ventas mediante un objeto acumulador, donde cada producto normalizado tiene asociado el total de dinero que generó. Posteriormente, utilizo sort() para ordenar los productos de mayor a menor valor y slice() para obtener los primeros k resultados.
