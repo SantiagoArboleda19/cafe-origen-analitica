@@ -526,3 +526,51 @@ Acumulo el valor monetario de las ventas correspondientes a cada producto.
 ¿Cómo agrupo?
 
 Agrupo las ventas mediante un objeto acumulador, donde cada producto normalizado tiene asociado el total de dinero que generó. Posteriormente, utilizo sort() para ordenar los productos de mayor a menor valor y slice() para obtener los primeros k resultados.
+
+MINIRETO 4 SEMANA 1 =================================================
+Bitácora – Motor de análisis de ventas v0.1
+
+Fecha: 2026-11-18
+
+Alcance de las pruebas: se hicieron sobre src/analitica.js en dos estados, antes y después de las correcciones. Para que los errores se pudieran observar, durante la prueba se usó un conjunto de 5 ventas diseñado para activarlos; los datos reales de src/datos.js no se modificaron.
+
+Error 1 – Bogotá aparece dos veces
+Campo	Detalle
+Síntoma	En el reporte de ventas por ciudad, Bogotá salía repetida como dos (o más) filas distintas, con el total partido entre ellas.
+Entrada que lo produce	Ventas cuya ciudad se escribe distinto: "Bogotá", "Bogota", "BOGOTÁ", " bogotá" (con espacio al inicio).
+Hipótesis	Las claves del objeto de totales se toman tal cual vienen. Para JavaScript "Bogotá" y "Bogota" son textos distintos, así que cada variante crea su propia clave.
+Prueba realizada	Importé analitica.js con las 5 ventas de prueba y miré las claves de totalPorCiudad, antes y después de la corrección.
+Causa	normalizarPalabra tomaba la primera letra antes del trim(): con " bogotá" la "primera letra" era el espacio, y quedaba la clave bogota en minúscula, aparte de Bogota. Una versión sin normalizar (como la preliminar) crea una clave por cada variante.
+Corrección	normalizarPalabra hace trim() y quita tildes primero, y solo después pone la inicial en mayúscula y el resto en minúscula. Si el texto queda vacío devuelve "" en vez de fallar.
+
+Resultados de la prueba (totalPorCiudad):
+
+Antes   (3 claves): Bogota 270000 | bogota 90000 | Medellin 200000
+Después (2 claves): Bogota 360000 | Medellin 200000
+
+Después de la corrección, la suma de las cuatro variantes (100000 + 20000 + 150000 + 90000 = 360000) queda en una sola clave Bogota.
+
+Error 2 – El ticket promedio da NaN en un día sin ventas
+Campo	Detalle
+Síntoma	Al filtrar un día sin ventas, el ticket promedio mostraba NaN en lugar de un número (según lo reportado por la gerente).
+Entrada que lo produce	Un arreglo vacío de ventas, por ejemplo ventas.filter(v => v.fecha === "2026-09-07") cuando ese día no existe en los datos.
+Hipótesis	El promedio divide el total entre la cantidad de ventas. Con cero ventas es 0 / 0, que en JavaScript da NaN.
+Prueba realizada	(1) Calculé a mano el promedio de un arreglo vacío: Math.floor(total / ventas.length) con total = 0 y ventas.length = 0. (2) Filtré un día inexistente (2026-09-07), obtuve [] y llamé a ticketPromedio antes y después de la corrección. (3) Probé un día con ventas para confirmar que el cálculo normal no cambió.
+Causa	Dividir entre una cantidad de ventas igual a 0 (0 / 0 da NaN). Además, en el analitica.js anterior la función evitaba la división pero devolvía null, y null.toLocaleString(...) en verificar.js falla al imprimir.
+Corrección	ticketPromedio solo cuenta ventas con cantidad > 0 y, si no queda ninguna, devuelve 0 antes de dividir. Así siempre devuelve un número que se puede formatear.
+
+Resultados de la prueba:
+
+Cálculo directo, arreglo vacío:  0 / 0 -> NaN
+Día sin ventas (2026-09-07) -> []
+ticketPromedio antes:           null
+ticketPromedio después:         0
+Después, día con ventas (06-09): 90000   (270000 / 3 ventas)
+
+El promedio de un día vacío ya no produce NaN ni null: devuelve 0.
+
+Decisión de diseño pendiente de confirmar con la gerente: se devuelve 0 para un día sin ventas. Si prefiere ver un mensaje tipo "Sin ventas" en el reporte, eso se resuelve al imprimir, no en la función.
+
+Conclusión
+
+Ninguno de los dos errores se presenta en v0.1. Cada uno quedó demostrado con una prueba que lo reproduce en el analitica.js anterior y muestra el resultado correcto en el corregido. Además, verificar.js corre completo con los datos reales: antes se detenía en la última línea porque ventasDelDia no estaba exportada ni importada, y ya lo está.
