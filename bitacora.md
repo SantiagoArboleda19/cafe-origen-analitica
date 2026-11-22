@@ -631,3 +631,125 @@ el arreglo una sola vez.
 El costo depende de cuántas veces se toca cada elemento, no de cuántas
 operaciones se hacen por elemento. Por eso `totalVendido` (n) y `ventaMayor`
 (2n) son de la misma clase, O(n), mientras que `primeraVenta` es O(1).
+
+MINIRETO6 SEMANA2---------------------------------------------------
+## Traza de `clientesRecurrentes` con 5 ventas
+
+Clientes del arreglo de prueba: `[C01, C02, C01, C03, C02]` (posiciones 0 a 4)
+
+| i | cliente i | j que recorre | Coincidencias                   | Comparaciones | recurrentes |
+|---|---        |---            |---                              |---            |---          |
+| 0 | C01       | 1, 2, 3, 4    | j=2 (C01): no estaba, se agrega | 4             | [C01]       |
+| 1 | C02       | 2, 3, 4       | j=4 (C02): no estaba, se agrega | 3             | [C01, C02]  |
+| 2 | C01       | 3, 4          | ninguna                         | 2             | [C01, C02]  |
+| 3 | C03       | 4             | ninguna                         | 1             | [C01, C02]  |
+| 4 | C02       | (ninguna)     | no hay posiciones posteriores   | 0             | [C01, C02]  |
+
+**Total de comparaciones de cliente: 4 + 3 + 2 + 1 + 0 = 10**
+
+Resultado: `[C01, C02]`. C03 no aparece porque compró una sola vez.
+
+### Generalización
+
+Para cada posición i, el ciclo interno compara con las posiciones i+1 hasta n-1,
+es decir, hace (n - 1 - i) comparaciones. Sumando todas las vueltas:
+
+(n-1) + (n-2) + ... + 1 + 0 = **n(n-1)/2**
+
+| n       | comparaciones |
+|---      |---            |
+| 5       | 10            |
+| 100     | 4.950         |
+| 1.000   | 499.500       |
+| 100.000 | 4.999.950.000 |
+
+n(n-1)/2 = n²/2 - n/2. Big O descarta la constante (½) y el término menor (-n/2),
+así que la función es **O(n²)**: si n se multiplica por 10, las comparaciones
+se multiplican por ~100.
+
+### Observaciones
+
+- La cantidad de comparaciones depende solo de n, no de los datos. Con
+  clientes repetidos o todos distintos, el ciclo interno hace las mismas
+  n(n-1)/2 comparaciones.
+- `recurrentes.includes(...)` solo se ejecuta cuando hay coincidencia (por el
+  cortocircuito de `&&`), así que no entra en este conteo. Puede agregar
+  trabajo extra, pero no cambia el orden de crecimiento.
+- Esto explica por qué con el historial anual la función "se quedó pensando":
+  con n grande, el trabajo crece al cuadrado.
+
+### Análisis de tiempos de ejecución (console.time / console.timeEnd)
+
+Resultados medidos
+
+n	    Tiempo	    Factor vs. fila anterior
+1.000	5,976 ms	n/a
+2.000	12,8 ms	    ×2,1
+4.000	50,258 ms	×3,9
+8.000	243,194 ms	×4,8
+16.000	1,163 s	    ×4,8
+
+Observación
+
+Al duplicar n, el tiempo no se duplica (como pasaría en O(n)), sino que se multiplica por un valor cercano a 4. De 1.000 a 2.000 el tiempo solo se duplica, pero de ahí en adelante crece entre ×3,9 y ×4,8: los últimos saltos quedan un poco por encima de 4, entre cuadruplicarse y quintuplicarse.
+
+Relación con O(n²)
+
+En un algoritmo cuadrático, T(2n) / T(n) = (2n)² / n² = 4, es decir, duplicar la entrada cuadruplica el número de operaciones. Los datos medidos siguen ese patrón, por lo que el algoritmo es consistente con una complejidad O(n²), típica de dos ciclos anidados.
+
+Por qué los factores no son exactamente 4
+
+Primera fila (×2,1): con n pequeño pesan más el calentamiento del motor, la compilación JIT y el ruido de la medición que el trabajo real del algoritmo.
+Últimas filas (×4,8): con arreglos grandes entran en juego la memoria caché y el recolector de basura, que añaden un costo extra a cada duplicación.
+
+Big O describe la tendencia cuando n crece, no una igualdad exacta en cada medición.
+
+### Conclusión
+
+El tiempo crece de forma cuadrática: con n = 16.000 ya supera 1 segundo y, con 10 veces más datos, tardaría unas 100 veces más. Por eso este enfoque no escala con datos grandes, y una alternativa con Map o Set (que baja la detección de duplicados a O(n)) es mucho más eficiente.
+
+### Estimación para 100.000 y 1.000.000 de ventas
+
+Regla usada: en una función O(n²), si n se multiplica por k, el tiempo se multiplica por k × k.
+
+Estimación para n = 100.000
+
+Punto de partida: n = 16.000 tardó 1,163 s.
+100.000 / 16.000 = 6,25, así que n se multiplica por 6,25.
+El tiempo se multiplica por 6,25 × 6,25 ≈ 39.
+1,163 s × 39 ≈ 45 s.
+
+Como la estimación es menor a 2 minutos, se ejecutó. El tiempo medido fue 45,23 s, casi igual a lo estimado, lo que confirma que la función es O(n²).
+
+Estimación para n = 1.000.000
+
+1.000.000 / 16.000 = 62,5, así que n se multiplica por 62,5.
+El tiempo se multiplica por 62,5 × 62,5 ≈ 3.900.
+1,163 s × 3.900 ≈ 4.500 s ≈ 75 minutos.
+
+Como la estimación supera los 2 minutos, no se ejecutó.
+
+Resumen
+
+n	Tiempo	Cómo se obtuvo
+16.000	1,163 s	Medido
+100.000	45,23 s	Estimado ≈ 45 s y luego medido
+1.000.000	≈ 75 min	Solo estimado
+
+Observación: al pasar de 100.000 a 1.000.000 de ventas (10 veces más datos), el tiempo se multiplica por 10 × 10 = 100: de menos de 1 minuto a más de 1 hora. Con una función cuadrática, el reporte se vuelve inviable cuando los datos crecen.
+
+### Costo oculto de includes
+
+recurrentes.includes también recorre un arreglo, así que es un ciclo escondido dentro de los dos ciclos de las comparaciones. En el peor caso (muchas coincidencias y un arreglo recurrentes muy grande), cada comparación cuesta hasta n pasos extra, y la complejidad sube de O(n²) a O(n³).
+
+En la práctica, recurrentes solo guarda clientes distintos y en nuestros datos es pequeño (3 clientes), por lo que includes cuesta casi un paso constante y el tiempo medido sigue el patrón de O(n²). Sin embargo, si el negocio tuviera miles de clientes recurrentes distintos, este costo oculto se notaría y el reporte sería aún más lento.
+
+### Conclusión para la gerente
+
+Gerente, el reporte de clientes recurrentes se vuelve lento por la forma en que la función busca. Toma la primera venta y la compara con todas las demás para ver si ese cliente aparece en otra venta. Además, revisa si ese cliente ya está en la lista de clientes recurrentes. Luego pasa a la segunda venta y repite todo, y así sucesivamente hasta terminar con todas las ventas.
+
+El problema es que cada venta nueva obliga a la función a compararse con todas las demás, así que el trabajo no crece al mismo ritmo que las ventas, sino mucho más rápido. Si las ventas se duplican, el tiempo se multiplica por cuatro o cinco.
+
+En nuestras pruebas: con 16.000 ventas el reporte tarda 1 segundo, pero con 100.000 ventas (unas 6 veces más) tarda 45 segundos (unas 39 veces más). Con 1.000.000 de ventas tardaría más de una hora.
+
+Por eso el reporte funciona bien con pocas ventas, pero se vuelve inviable cuando el negocio crece. La solución es cambiar la forma de buscar, por ejemplo llevando un registro de los clientes que ya aparecieron, para no comparar cada venta con todas las demás. Así el tiempo crecería al mismo ritmo que las ventas.

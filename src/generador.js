@@ -42,19 +42,16 @@ const generarVentas = (n) => {
         {
             id: i,
             fecha: fechaAzar(),
-            cliente: CLIENTES[numeroAlAzar(1, 3)],
-            producto: PRODUCTOS[numeroAlAzar(1, PRODUCTOS.length - 1)].producto,
-            ciudad: CIUDAD[numeroAlAzar(1, CIUDAD.length - 1)],
-            precio: PRODUCTOS[numeroAlAzar(1, PRODUCTOS.length - 1)].precio
+            cliente: CLIENTES[numeroAlAzar(0, 2)],
+            producto: PRODUCTOS[numeroAlAzar(0, PRODUCTOS.length - 1)].producto,
+            ciudad: CIUDAD[numeroAlAzar(0, CIUDAD.length - 1)],
+            precio: PRODUCTOS[numeroAlAzar(0, PRODUCTOS.length - 1)].precio
         }
     )
     }
     return generado;
 }
 
-
-
-// 12 objetos se recorren con una sola llamada
 function totalVendidoI(ventas, c) {
     return ventas.reduce((acc, venta) => {
     c.v++
@@ -86,9 +83,6 @@ function totalPorCiudadI(ventas, c) {
     return acc
 }, {})
 }
-
-//console.log(generarVentas(numeroAlAzar(1, 5)));
-
 
 module.exports = {totalVendidoI, ventaMayorI, totalPorCiudadI, generarVentas
 }
