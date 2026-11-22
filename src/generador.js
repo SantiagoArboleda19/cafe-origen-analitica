@@ -1,0 +1,95 @@
+const { valorVenta, normalizarPalabra} = require('./analitica');
+const { ventas } = require('./datos');
+
+
+const PRODUCTOS = ventas
+    .map(venta => {
+    return { "producto": venta.producto, "precio": venta.precio}})
+    .reduce((acc, venta) => {
+    if(acc.some(p => p.producto === venta.producto)){
+        return acc
+    }
+    acc.push(venta)
+    return acc}, []);
+
+
+const CIUDAD = ventas
+    .map((venta) => venta.ciudad)
+    .reduce((acc, ciudad) => {
+        if(acc.some(p => p === ciudad)) return acc
+        acc.push(ciudad)
+        return acc
+    }, []);
+
+const CLIENTES = ventas
+    .map((venta) => venta.cliente)
+    .reduce((acc, cliente) => {
+        if(acc.some(p => p === cliente)) return acc
+        acc.push(cliente)
+        return acc
+    }, []);
+
+const numeroAlAzar = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+const fechaAzar = () => 
+    `20${String(numeroAlAzar(25, 27))}-${String(numeroAlAzar(1, 12)).padStart(2, '0')}-${String(numeroAlAzar(1, 30)).padStart(2, '0')}`;
+//console.log(fechaAzar());
+
+const generarVentas = (n) => {
+    let generado = [];
+    for (let i = 0; i < n; i++) {
+    generado.push(
+        {
+            id: i,
+            fecha: fechaAzar(),
+            cliente: CLIENTES[numeroAlAzar(1, 3)],
+            producto: PRODUCTOS[numeroAlAzar(1, PRODUCTOS.length - 1)].producto,
+            ciudad: CIUDAD[numeroAlAzar(1, CIUDAD.length - 1)],
+            precio: PRODUCTOS[numeroAlAzar(1, PRODUCTOS.length - 1)].precio
+        }
+    )
+    }
+    return generado;
+}
+
+
+
+// 12 objetos se recorren con una sola llamada
+function totalVendidoI(ventas, c) {
+    return ventas.reduce((acc, venta) => {
+    c.v++
+    return acc += valorVenta(venta);
+}, 0);
+}
+
+function ventaMayorI(ventas, c) {
+    let mayor = 0;
+    return ventas.reduce((acc, venta) => {
+    c.v++
+    c.c++
+        if (valorVenta(venta) > mayor) { 
+            mayor = valorVenta(venta); 
+            acc = venta;
+    }
+    return acc
+    }, {})
+}
+
+function totalPorCiudadI(ventas, c) {
+    return ventas.reduce((acc, venta) => {
+    c.v++
+    c.c++
+    if (!(normalizarPalabra(venta.ciudad) in acc)){
+        acc[normalizarPalabra(venta.ciudad)] = 0;
+    }
+    acc[normalizarPalabra(venta.ciudad)] += valorVenta(venta)
+    return acc
+}, {})
+}
+
+//console.log(generarVentas(numeroAlAzar(1, 5)));
+
+
+module.exports = {totalVendidoI, ventaMayorI, totalPorCiudadI, generarVentas
+}
+

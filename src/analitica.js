@@ -20,6 +20,9 @@ const unidadesVendidas = ventas => {
     return total;
 }
 
+console.log(unidadesVendidas(ventas))
+
+
 const ventaMayor = ventas => {
     let mayor = 0;
     let indice = 0;
@@ -40,14 +43,15 @@ const ticketPromedio = ventas => {
     for (const venta of ventas) {
         if (venta.cantidad > 0) {
             total += valorVenta(venta);
-            cantidadVentas++;
         }
     }
-    if (cantidadVentas === 0) {
+    
+    if (unidadesVendidas(ventas) === 0) {
         return 0;
     }
-    return Math.floor(total / cantidadVentas);
+    return Math.floor(total / unidadesVendidas(ventas));
 }
+console.log(ticketPromedio(ventas));
 
 const normalizarPalabra = palabra => {
     const limpia = palabra.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -67,12 +71,14 @@ const ventasPorCiudad = (ventas, ciudad) => {
     return cantidadVentas;
 }
 
-const totalVendidoM = ventas.reduce((acc, venta) => acc += valorVenta(venta), 0) 
+const totalVendidoM = ventas.reduce((acc, venta) => acc += valorVenta(venta), 0);
 
 const unidadesVendidasM = ventas.reduce((acc, venta) => acc += venta.cantidad , 0)
 
 const ventasPorCiudadM = (ventas, ciudad) => {
-    return ventas.filter(venta => normalizarPalabra(venta.ciudad) === normalizarPalabra(ciudad)).reduce((acc, venta) => acc + valorVenta(venta), 0);
+    return ventas
+    .filter(venta => normalizarPalabra(venta.ciudad) === normalizarPalabra(ciudad))
+    .reduce((acc, venta) => acc + valorVenta(venta), 0);
 }
 
 const totalPorCiudad = ventas.reduce((acc, venta) => {
@@ -81,7 +87,7 @@ const totalPorCiudad = ventas.reduce((acc, venta) => {
     }
     acc[normalizarPalabra(venta.ciudad)] += valorVenta(venta)
     return acc
-},{})
+}, {})
 
 const unidadesPorProducto = ventas.reduce((acc, venta) => {
     if(!(normalizarPalabra(venta.producto) in acc)){
@@ -91,7 +97,7 @@ const unidadesPorProducto = ventas.reduce((acc, venta) => {
     return acc
 },{})
 
-const topProductosPorvalor = (ventas, k) => {
+const topProductosPorvalor = (ventas, k = 0) => {
     return Object.entries(
         ventas.reduce((acc, venta) => {
             if(!(normalizarPalabra(venta.producto) in acc)){
@@ -137,5 +143,7 @@ module.exports = {
     ventasPorCiudadM,
     unidadesPorProducto,
     topProductosPorvalor,
-    ventasDelDia
+    ventasDelDia,
+    valorVenta,
+    normalizarPalabra
 };

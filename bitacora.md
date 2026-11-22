@@ -574,3 +574,60 @@ Decisión de diseño pendiente de confirmar con la gerente: se devuelve 0 para u
 Conclusión
 
 Ninguno de los dos errores se presenta en v0.1. Cada uno quedó demostrado con una prueba que lo reproduce en el analitica.js anterior y muestra el resultado correcto en el corregido. Además, verificar.js corre completo con los datos reales: antes se detenía en la última línea porque ventasDelDia no estaba exportada ni importada, y ya lo está.
+
+MINIRETO5 SEMANA2----------------------------------------------
+
+Medición de operaciones (versiones instrumentadas)
+
+Funciones medidas: totalVendido, ventaMayor y totalPorCiudad, cada una con su propio contador.
+
+Visita: cada vez que la función llega a una venta del arreglo.
+Comparación: cada vez que se evalúa una condición, aunque dé falso. El contador va antes del if, no dentro de su cuerpo.
+Predicción (antes de medir)
+
+Si n (cantidad de ventas) se multiplica por 10, el número de operaciones de cada función se multiplica por 10.
+
+Función	        Visitas	Comparaciones	Al pasar de n a 10n
+totalVendido	n	    0	            visitas ×10
+ventaMayor	    n	    n	            ambas ×10
+totalPorCiudad	n	    n	            ambas ×10
+
+Las tres recorren el arreglo una sola vez, sin ciclos anidados, así que el crecimiento es lineal: O(n). Con 10 ventas se esperan 10 visitas por función; con 100, 100.
+
+Aclaración: la condición se evalúa en todas las vueltas, pero su cuerpo no siempre se ejecuta. Con los datos actuales, ventaMayor entra al cuerpo 4 veces de 12 (cada nuevo máximo) y totalPorCiudad 4 veces de 12 (una por ciudad nueva). Eso no cambia el conteo de comparaciones.
+
+### Resultados
+
+| n | primeraVenta | totalVendido | ventaMayor | totalPorCiudad |
+|---|---|---|---|---|
+| 100 | v: 1, c: 0 | v: 100, c: 0 | v: 100, c: 100 | v: 100, c: 100 |
+| 1.000 | v: 1, c: 0 | v: 1.000, c: 0 | v: 1.000, c: 1.000 | v: 1.000, c: 1.000 |
+| 10.000 | v: 1, c: 0 | v: 10.000, c: 0 | v: 10.000, c: 10.000 | v: 10.000, c: 10.000 |
+| 100.000 | v: 1, c: 0 | v: 100.000, c: 0 | v: 100.000, c: 100.000 | v: 100.000, c: 100.000 |
+
+(v = visitas, c = comparaciones)
+
+### Comparación con la predicción
+La predicción se cumplió: al multiplicar n por 10, las operaciones de las tres
+funciones también se multiplicaron por 10. `primeraVenta`, que agregué después,
+no creció (×1).
+
+### Clasificación
+
+- **`primeraVenta`: O(1).** Accede directamente a `ventas[0]`. Siempre hace 1
+  visita, sin importar si n es 100 o 100.000.
+- **`totalVendido`: O(n).** Un solo recorrido con `reduce`. Hace una visita por
+  venta, así que las visitas son iguales a n.
+- **`ventaMayor`: O(n).** Un solo recorrido. Por cada venta hace una visita y
+  una comparación (2n operaciones en total). Las constantes no cuentan en
+  Big O, así que sigue siendo lineal.
+- **`totalPorCiudad`: O(n).** Un solo recorrido. Por cada venta hace una visita
+  y una consulta al objeto de ciudades (también 2n). Es lineal por la misma razón.
+
+Ninguna función es O(n²), porque ninguna tiene ciclos anidados: todas recorren
+el arreglo una sola vez.
+
+### Conclusión
+El costo depende de cuántas veces se toca cada elemento, no de cuántas
+operaciones se hacen por elemento. Por eso `totalVendido` (n) y `ventaMayor`
+(2n) son de la misma clase, O(n), mientras que `primeraVenta` es O(1).
