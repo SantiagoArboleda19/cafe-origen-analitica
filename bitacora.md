@@ -753,3 +753,125 @@ El problema es que cada venta nueva obliga a la función a compararse con todas 
 En nuestras pruebas: con 16.000 ventas el reporte tarda 1 segundo, pero con 100.000 ventas (unas 6 veces más) tarda 45 segundos (unas 39 veces más). Con 1.000.000 de ventas tardaría más de una hora.
 
 Por eso el reporte funciona bien con pocas ventas, pero se vuelve inviable cuando el negocio crece. La solución es cambiar la forma de buscar, por ejemplo llevando un registro de los clientes que ya aparecieron, para no comparar cada venta con todas las demás. Así el tiempo crecería al mismo ritmo que las ventas.
+
+### Recorridos, arreglos creados, tiempo y espacio
+Traza con 4 ventas
+
+Ventas de ejemplo: V1 (Medellín), V2 (Cali), V3 (Medellín), V4 (Bogotá). Se busca el total de Medellín.
+
+Versión encadenada (totalCiudadCadena)
+
+Paso	    Qué hace	                                                            Elementos que recorre	Arreglo nuevo
+1. map      (normalizar) Crea una copia de cada venta con la ciudad normalizada	    4 (V1, V2, V3, V4)	    Sí, de 4 elementos
+2. filter	Deja solo las de Medellín	                                            4	Sí, de 2 elementos  (V1, V3)
+3. map      (valorVenta)	Calcula el valor de cada venta que quedó	            2	                    Sí, de 2 elementos
+4. reduce	Suma los valores	                                                    2	                    No (devuelve un número)
+
+Total: 4 recorridos y 3 arreglos nuevos.
+
+Versión de una pasada (totalCiudadUnaPasada)
+
+Venta	Qué hace	                            total
+V1	    Normaliza, es de Medellín, suma	        valor(V1)
+V2	    Normaliza, no es de Medellín, no suma	sin cambio
+V3	    Normaliza, es de Medellín, suma	        valor(V1) + valor(V3)
+V4	    Normaliza, no es de Medellín, no suma	sin cambio
+
+Total: 1 recorrido y 0 arreglos nuevos (solo usa las variables total, ciudadNor, ventaNor).
+
+Generalización con n ventas (peor caso: todas son de Medellín)
+	        Recorridos	Arreglos nuevos	    Pasos aprox.	Tiempo	Espacio extra
+Cadena	    4	        3 (de tamaño n)	    4n	            O(n)	3n → O(n)
+Una pasada	1	        0	                n	            O(n)	O(1)
+Observaciones
+La versión encadenada no modifica las ventas originales: el primer map crea un objeto nuevo por venta. Esto cuesta algo más de memoria, pero sigue siendo O(n) y evita efectos secundarios.
+En la versión de una pasada, valorVenta se calcula solo para las ventas de Medellín (dentro del if), lo que evita trabajo innecesario.
+Conclusión
+
+Ambas versiones son O(n) en tiempo: si las ventas se duplican, el tiempo también se duplica (no se cuadruplica, como pasaba con la función de clientes recurrentes). La diferencia está en el espacio: la versión encadenada crea arreglos intermedios que crecen con n, mientras que la de una pasada usa una cantidad fija de memoria sin importar cuántas ventas haya. Además, la de una pasada hace menos trabajo por venta, aunque Big O no distingue esa diferencia.
+
+### ¿Por qué ambas versiones son O(n) aunque una recorra el arreglo cuatro veces?
+
+Conteo de pasos (peor caso)
+
+Cadena: n + n + n + n = 4n pasos.
+Una pasada: n pasos.
+
+Regla de simplificación aplicada
+
+Big O elimina las constantes que multiplican. Describe cómo crece el tiempo cuando n crece, no cuántos pasos exactos se hacen. El 4 de 4n es una constante: no depende del tamaño de la entrada, así que se descarta y 4n queda como O(n).
+
+Por qué tiene sentido
+
+Si las ventas se duplican, la cadena pasa de 4n a 8n pasos (el doble) y la versión de una pasada pasa de n a 2n pasos (también el doble). Ambas crecen al mismo ritmo, de forma lineal. Recorrer el arreglo 4 veces solo hace la curva más empinada desde el inicio, pero no cambia su forma.
+
+n	Cadena (4n)	Una pasada (n)	Al duplicar n
+1.000	4.000	1.000	
+2.000	8.000	2.000	×2 en ambas
+4.000	16.000	4.000	×2 en ambas
+
+Conclusión
+
+Cuatro recorridos es una cantidad fija que no depende de n, por eso Big O la elimina como constante y ambas versiones quedan en O(n) de tiempo. La versión de una pasada sigue siendo algo más rápida en la práctica, pero Big O no distingue esa diferencia, solo cómo crece el tiempo al aumentar n.
+
+### Complejidad espacial de las funciones del motor
+
+Criterio: se cuenta solo la memoria extra que crea la función (incluido lo que devuelve), no los datos que ya recibe. Los contadores numéricos, aunque crezcan hasta n, ocupan siempre el mismo espacio.
+
+O(1): memoria adicional constante
+Función	Por qué
+valorVenta	Calcula y devuelve un número
+totalVendido, unidadesVendidas	Una variable acumuladora
+totalVendidoM, unidadesVendidasM	reduce con acumulador numérico
+ventaMayor, ventaMayorM	Guardan solo la mayor venta vista (una referencia)
+ticketPromedio	Variables sueltas y llamadas a unidadesVendidas
+ventasPorCiudad	Un contador; los strings temporales se descartan en cada vuelta
+totalCiudadUnaPasada	Un ciclo con total, ciudadNor y ventaNor
+normalizarPalabra	Strings del largo de una palabra, acotado (O(1) en la práctica)
+numeroAlAzar, fechaAzar	Resultado de tamaño fijo (un número o un string de 10 caracteres)
+totalVendidoI, ventaMayorI, primeraVenta	Variables y un contador de tamaño fijo ({v, c})
+O(n): proporcional a los datos
+Función	Por qué
+ventasPorCiudadM	filter crea un arreglo de hasta n ventas
+ventasDelDia	acc guarda las ventas de esa fecha (hasta n)
+totalCiudadCadena	Tres arreglos intermedios de tamaño n
+generarVentas	Crea un arreglo de n objetos de tamaño fijo
+PRODUCTOS, CIUDAD, CLIENTES	El map intermedio tiene n elementos (sin él serían O(c))
+orquestador, tiempos	O(n), con n el mayor tamaño probado: el arreglo de cada vuelta se descarta al terminar
+Proporcional a las claves distintas: O(c) u O(p)
+Función	Espacio	Por qué
+totalPorCiudad, totalPorCiudadI	O(c)	Un objeto con una clave por ciudad distinta, no por venta
+unidadesPorProducto	O(p)	Un objeto con una clave por producto distinto
+topProductosPorvalor	O(p), no O(k)	Construye el objeto con todos los productos, crea el arreglo de Object.entries y ordena todo antes del slice(0, k)
+clientesRecurrentes	O(c)	recurrentes solo guarda clientes distintos que se repiten
+
+En el peor caso teórico (todas las claves distintas), c y p llegan a n, así que formalmente estas funciones son O(n). En la práctica, con pocas ciudades, productos y clientes, usan muy poca memoria.
+
+Los dos casos que pedía el ejercicio
+totalPorCiudad: su objeto crece con la cantidad de ciudades distintas, no con la cantidad de ventas. Con 1.000.000 de ventas y 5 ciudades, tiene 5 claves.
+topProductosPorValor: aunque devuelva solo k elementos, internamente guarda todos los productos distintos. Que el resultado sea pequeño no significa que la memoria usada también lo sea.
+Observación: espacio y tiempo son cosas distintas
+
+clientesRecurrentes usa poca memoria (O(c)), pero es O(n²) en tiempo. Por su parte, totalCiudadCadena y totalCiudadUnaPasada son ambas O(n) en tiempo, y se diferencian en el espacio: O(n) la cadena y O(1) la de una pasada.
+
+### Eleccion total ciudad
+
+Decisión: versión de totalCiudad que se queda en el motor
+
+Versión elegida: totalCiudadUnaPasada.
+
+Justificación por recursos
+
+	                Cadena	Una pasada
+Recorridos	        4	    1
+Arreglos nuevos	    3       (de tamaño n)	0
+Tiempo	            O(n)	O(n)
+Espacio	            O(n)	O(1)
+
+Ambas tienen el mismo tiempo en Big O, pero la de una pasada hace menos trabajo por venta y no crea arreglos ni objetos intermedios, así que su memoria no crece con los datos. Con 1.000.000 de ventas, la cadena crearía varios arreglos de ese tamaño, y la de una pasada solo usa tres variables.
+
+Justificación por legibilidad
+
+La cadena (map, filter, map, reduce) se lee como una receta, pero es más difícil de seguir paso a paso y hay que fijarse en qué arreglo intermedio tiene cada paso. La versión de una pasada se lee de arriba abajo con un solo ciclo: normaliza, compara y suma. En este caso la más simple en recursos también es la más fácil de seguir, así que no hay que sacrificar una por la otra.
+
+Decisión: se deja totalCiudadUnaPasada porque tiene menor uso de memoria (O(1) frente a O(n)), hace un solo recorrido y es más fácil de leer.

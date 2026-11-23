@@ -3,7 +3,7 @@ const { generarVentas,
         ventaMayorI,
         totalPorCiudadI} = require('./generador');
 
-const { ventas } = require('./datos');
+const { normalizarPalabra, valorVenta } = require('./analitica');
 
 const generdoraContadores = () => ({v: 0, c: 0})
 
@@ -39,8 +39,6 @@ function orquestador(tamanios){
 
 //console.table(orquestador([100, 1000, 10000, 100000]))
 
-console.log("=======================");
-
 function clientesRecurrentes(ventas) {
     const recurrentes = [];
 
@@ -63,5 +61,33 @@ function tiempos(tamanios){
     }
 }
 
-tiempos([100000])
+//tiempos([13000])
+
+/*MINIRETO7 SEMANA1 */
+const ventas = generarVentas(10000)
+
+function totalCiudadCadena(ventas, ciudad)  {
+    const ciudadNor = normalizarPalabra(ciudad)
+    return ventas
+    .map(venta => ({ ...ventas, ciudad: normalizarPalabra(venta.ciudad) }))
+    .filter(venta =>  venta.ciudad === ciudadNor)
+    .map(venta => valorVenta(venta))
+    .reduce((acc, venta) => acc += venta, 0)
+}
+
+function totalCiudadUnaPasada(ventas, ciudad){
+    let total = 0;
+    const ciudadNor = normalizarPalabra(ciudad);
+    for (const venta of ventas) {
+        let ventaNor = normalizarPalabra(venta.ciudad);
+        if(ciudadNor === ventaNor){
+            total += valorVenta(venta);
+        }
+    }
+    return total
+}
+
+console.log(totalCiudadCadena(ventas, "medellin"));
+console.log(totalCiudadUnaPasada(ventas, "medellin"));
+
 module.exports = { generdoraContadores }

@@ -1,7 +1,6 @@
 const { valorVenta, normalizarPalabra} = require('./analitica');
 const { ventas } = require('./datos');
 
-
 const PRODUCTOS = ventas
     .map(venta => {
     return { "producto": venta.producto, "precio": venta.precio}})
@@ -38,14 +37,16 @@ const fechaAzar = () =>
 const generarVentas = (n) => {
     let generado = [];
     for (let i = 0; i < n; i++) {
+        const prod = PRODUCTOS[numeroAlAzar(0, PRODUCTOS.length - 1)];
     generado.push(
         {
             id: i,
             fecha: fechaAzar(),
-            cliente: CLIENTES[numeroAlAzar(0, 2)],
-            producto: PRODUCTOS[numeroAlAzar(0, PRODUCTOS.length - 1)].producto,
+            cliente: CLIENTES[numeroAlAzar(0, CLIENTES.length - 1)],
+            producto: prod.producto,
             ciudad: CIUDAD[numeroAlAzar(0, CIUDAD.length - 1)],
-            precio: PRODUCTOS[numeroAlAzar(0, PRODUCTOS.length - 1)].precio
+            cantidad: numeroAlAzar(1, 5),
+            precio: prod.precio
         }
     )
     }
@@ -62,12 +63,12 @@ function totalVendidoI(ventas, c) {
 function ventaMayorI(ventas, c) {
     let mayor = 0;
     return ventas.reduce((acc, venta) => {
-    c.v++
-    c.c++
+        c.v++
+        c.c++
         if (valorVenta(venta) > mayor) { 
             mayor = valorVenta(venta); 
             acc = venta;
-    }
+        }
     return acc
     }, {})
 }

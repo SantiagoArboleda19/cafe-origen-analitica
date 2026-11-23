@@ -11,40 +11,21 @@ const {
     ventaMayorM,
     totalPorCiudad,
     unidadesPorProducto,
-    ventasDelDia
+    ventasDelDia,
+    topProductosPorvalor
 } = require('./analitica')
 
-/*
-console.log(totalVendido(ventas));
-console.log(totalVendidoM);
-
-console.log(unidadesVendidas(ventas));
-console.log(unidadesVendidasM);
-
-console.log(ventasPorCiudad(ventas,"MedeLLIn"))
-console.log(ventasPorCiudadM(ventas,"MedeLLin"));
-
-if(totalVendido(ventas) == totalVendidoM){
-    console.log("OK")
-}
-else {
-    console.log("DIFERENTE")
+function verificarFunciones(funcionUno, funcionDos){
+    if(funcionUno === funcionDos) console.log("Ok")
+    else console.log("Diferente");
+    
 }
 
-if(unidadesVendidas(ventas) == unidadesVendidasM){
-    console.log("OK")
-}
-else {
-    console.log("DIFERENTE")
-}
+verificarFunciones(totalVendido(ventas), totalVendidoM);
+verificarFunciones(unidadesVendidas(ventas), unidadesVendidasM);
+verificarFunciones(ventasPorCiudad(ventas, "medellin"), ventasPorCiudadM(ventas, "Medellin"));
 
-if(ventasPorCiudad(ventas,"MedeLLIn") == ventasPorCiudadM(ventas,"MedeLLin")){
-    console.log("OK")
-}
-else {
-    console.log("DIFERENTE")
-}
-*/
+//=================================================================
 
 console.log("--- Venta mayor ---");
 console.log(ventaMayorM(ventas));
