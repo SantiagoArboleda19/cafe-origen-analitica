@@ -50,7 +50,7 @@ function clientesRecurrentes(ventas) {
     return recurrentes;
 }
 
-function tiempos(tamanios){
+function tiempos(tamanios, funcion){
     for (const tamanio of tamanios) {
         console.time();
         clientesRecurrentes(generarVentas(tamanio));
@@ -79,4 +79,4 @@ function totalCiudadUnaPasada(ventas, ciudad){
     return total
 }
 
-module.exports = { generadorContadores }
+module.exports = { generadorContadores, clientesRecurrentes }

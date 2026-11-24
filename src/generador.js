@@ -42,7 +42,7 @@ const generarVentas = (n) => {
         {
             id: i,
             fecha: fechaAzar(),
-            cliente: CLIENTES[numeroAlAzar(0, CLIENTES.length - 1)],
+            cliente: `C${String(numeroAlAzar(1, 5000))}`,
             producto: prod.producto,
             ciudad: CIUDAD[numeroAlAzar(0, CIUDAD.length - 1)],
             cantidad: numeroAlAzar(1, 5),

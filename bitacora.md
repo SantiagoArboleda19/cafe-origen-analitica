@@ -795,3 +795,125 @@ La cadena (`map`, `filter`, `map`, `reduce`) se lee como una receta, pero es má
 **Observación 3: aceptada, sin cambios en los datos.** El Minireto 8.3 ya aclara que `clientesRecurrentes` usa las mediciones del Minireto 6. No se repitieron con 10.000 ventas porque ya existían tres tamaños medidos (16.000, 100.000 y los anteriores) y con ellos se verificó la proyección desde dos bases distintas.
 
 **Observación 4: pendiente de verificar.** Se revisará el código actual de `ticketPromedio` contra la traza del Minireto 2. Si no coinciden, se corregirá la que esté desactualizada.
+
+## Minireto 9 (Semana 2): Optimización de `clientesRecurrentes` con `Set` y `Map`
+
+### 9.1 Objetivo
+
+Aplicar el plan de optimización: reemplazar la comparación de cada venta con todas las siguientes por un **registro de los clientes que ya aparecieron**, para recorrer las ventas una sola vez. Se implementan dos versiones y se comparan con la original.
+
+### 9.2 Versiones implementadas
+
+**Con `Set`:** guarda los clientes vistos y los recurrentes. Si un cliente ya estaba en vistos, es recurrente.
+
+```javascript
+function clientesRecurrentesSet(ventas) {
+    const clientesVistos = new Set();
+    const clientesRecurrentes = new Set();
+    for (const venta of ventas) {
+        if (clientesVistos.has(venta.cliente)) clientesRecurrentes.add(venta.cliente);
+        else clientesVistos.add(venta.cliente);
+    }
+    const recurrentes = [];
+    for (const cliente of clientesRecurrentes) {
+        recurrentes.push(cliente);
+    }
+    return recurrentes;
+}
+```
+
+**Con `Map`:** guarda cuántas compras hizo cada cliente. Los recurrentes son los que tienen más de una compra.
+
+```javascript
+function comprasPorClientes(ventas) {
+    const comprasCliente = new Map();
+    for (const venta of ventas) {
+        comprasCliente.set(venta.cliente, (comprasCliente.get(venta.cliente) || 0) + 1);
+    }
+    const recurrentes = [];
+    for (const [cliente, cantidad] of comprasCliente) {
+        if (cantidad > 1) recurrentes.push(cliente);
+    }
+    return recurrentes;
+}
+```
+
+| Versión | Tiempo | Espacio | Por qué |
+| --- | --- | --- | --- |
+| Original (`clientesRecurrentes`) | O(n²) | O(c) | Dos ciclos anidados: cada venta se compara con las siguientes |
+| `clientesRecurrentesSet` | O(n) | O(c) | Un recorrido, y `has` y `add` cuestan O(1) en promedio |
+| `comprasPorClientes` | O(n) | O(c) | Un recorrido, y `get` y `set` cuestan O(1) en promedio |
+
+Tanto `Set` como `Map` funcionan con tablas hash, por eso preguntar si un cliente ya existe no obliga a recorrer nada. El espacio sigue siendo O(c), con c los clientes distintos, pero ahora se guardan todos los clientes y no solo los recurrentes.
+
+### 9.3 Mediciones
+
+Se midió con `console.time` y `console.timeEnd`, una corrida por tamaño. La original solo se corrió hasta 100.000, que ya tarda unos 46 segundos.
+
+| n | Original | `Set` | `Map` |
+| ---: | ---: | ---: | ---: |
+| 1.000 | 6,13 ms | 0,473 ms | 0,487 ms |
+| 10.000 | 368,175 ms | 7,06 ms | 5,302 ms |
+| 100.000 | 45,939 s | 57,179 ms | 57,794 ms |
+
+**Cuánto crece el tiempo al multiplicar n por 10:**
+
+| Versión | De 1.000 a 10.000 | De 10.000 a 100.000 | Esperado |
+| --- | ---: | ---: | --- |
+| Original | × 60 | × 125 | × 100 (O(n²)) |
+| `Set` | × 15 | × 8 | × 10 (O(n)) |
+| `Map` | × 11 | × 11 | × 10 (O(n)) |
+
+**Cuántas veces más rápida es cada versión que la original:**
+
+| n | `Set` | `Map` |
+| ---: | ---: | ---: |
+| 1.000 | ≈ 13 veces | ≈ 13 veces |
+| 10.000 | ≈ 52 veces | ≈ 69 veces |
+| 100.000 | ≈ 803 veces | ≈ 795 veces |
+
+### 9.4 Análisis
+
+- **La original crece al cuadrado.** Al multiplicar n por 10, el tiempo se multiplica por un valor cercano a 100, igual que en el Minireto 6.
+- **`Set` y `Map` crecen en línea recta.** Al multiplicar n por 10, el tiempo se multiplica por un valor cercano a 10.
+- **La ventaja crece con n.** Con 1.000 ventas la mejora es de 13 veces, y con 100.000 pasa de 800 veces: la original tarda casi 46 segundos y las otras dos menos de 60 milisegundos.
+- **`Set` y `Map` empatan.** Las diferencias entre ellos (por ejemplo 7,06 y 5,302 ms con 10.000 ventas) están dentro del ruido de la medición, y con 100.000 dan prácticamente lo mismo.
+- **Proyección con 1.000.000 de ventas** (n × 10 en las lineales, n × 10 al cuadrado en la original, desde 100.000):
+
+| Versión | Estimado con 1.000.000 |
+| --- | ---: |
+| Original | ≈ 4.594 s ≈ 77 min |
+| `Set` | ≈ 0,57 s |
+| `Map` | ≈ 0,58 s |
+
+### 9.5 Intercambio entre tiempo y memoria
+
+La solución nueva **gasta algo más de memoria para ahorrar muchísimo tiempo**.
+
+| Versión | Qué guarda en memoria | Memoria | Tiempo |
+| --- | --- | --- | --- |
+| Original | Solo los clientes recurrentes | O(c) | O(n²) |
+| `Set` | Los clientes vistos y los recurrentes (2 conjuntos) | O(c) | O(n) |
+| `Map` | Cada cliente con su cantidad de compras (1 mapa) | O(c) | O(n) |
+
+c es la cantidad de clientes distintos.
+
+**Qué se gana.** La original compara cada venta con las siguientes, lo que da unas 5 × 10¹¹ comparaciones con 1.000.000 de ventas. Las versiones nuevas hacen un solo recorrido, del orden de 1.000.000 de pasos, unas 500.000 veces menos trabajo.
+
+**Qué se paga.** La original solo guardaba a los clientes recurrentes. Las nuevas guardan un registro de **todos** los clientes distintos, incluidos los que compraron una sola vez, para no tener que buscarlos de nuevo. En Big O el espacio sigue siendo O(c), pero la constante es mayor. En el peor caso, si cada venta fuera de un cliente distinto, el registro tendría n entradas, y el espacio sería O(n).
+
+**Por qué conviene.** El tiempo baja de cuadrático a lineal, mientras que la memoria crece como mucho en proporción a los datos y nunca más rápido que ellos. Es un buen intercambio porque lo que hacía inviable el reporte era el tiempo, no la memoria.
+
+**Cuándo no valdría la pena.** Con muy pocas ventas la original es suficiente, porque el tiempo es despreciable y no se necesita el registro adicional. Tampoco convendría si la memoria disponible fuera muy limitada y hubiera muchísimos clientes distintos.
+
+**Diferencia entre las dos versiones.** `Set` usa dos conjuntos y `Map` uno solo, que guarda además cuántas compras hizo cada cliente. En Big O es lo mismo (O(c)), y a cambio `Map` aporta más información.
+
+### 9.6 Limitaciones de la medición
+
+- **El tiempo incluye `generarVentas`.** Cada medición genera las ventas dentro del cronómetro. En la original eso casi no se nota, porque el tiempo lo domina el algoritmo cuadrático. En `Set` y `Map` sí pesa, y es probable que gran parte de esos 57 ms sea generar las ventas. Por eso la mejora real es mayor que la de la tabla, y los tiempos de `Set` y `Map` son una cota superior.
+- **Una sola corrida por tamaño.** Con tiempos tan pequeños (0,4 ms) el calentamiento del motor y el ruido pesan, y por eso el factor de 1.000 a 10.000 en `Set` (× 15) sale mayor que 10.
+- **Las proyecciones son estimaciones** a partir del patrón de crecimiento, no mediciones con 1.000.000 de ventas.
+
+### 9.7 Conclusión
+
+Guardar los clientes que ya aparecieron evita volver a buscarlos en cada comparación, y baja `clientesRecurrentes` de O(n²) a O(n). Con 100.000 ventas, el reporte pasa de casi 46 segundos a menos de 60 milisegundos, y con 1.000.000 pasaría de más de una hora a menos de un segundo. `Set` y `Map` rinden igual, así que la elección depende de lo que se necesite: `Map` además guarda cuántas compras hizo cada cliente.
