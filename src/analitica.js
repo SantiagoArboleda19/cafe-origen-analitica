@@ -33,16 +33,21 @@ const ventaMayor = (ventas) => {
 
 const ticketPromedio = (ventas) => {
     let total = 0;
-    const unidades = unidadesVendidas(ventas);
+    let ventasValidas = 0
     for (const venta of ventas) {
-        total += valorVenta(venta);
+        if(venta.cantidad > 0){
+            total += valorVenta(venta)
+            ventasValidas++
+        }
     }
 
-    if (unidades === 0) {
+    if (ventasValidas === 0) {
         return 0;
     }
-    return Math.floor(total / unidades);
+    return Math.floor(total / ventasValidas);
 };
+
+console.log(ticketPromedio(ventas));
 
 const normalizarPalabra = (palabra) => {
     const limpia = palabra

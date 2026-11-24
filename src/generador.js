@@ -1,4 +1,4 @@
-const { valorVenta, normalizarPalabra} = require('./analitica');
+const { valorVenta, normalizarPalabra, } = require('./analitica');
 const { ventas } = require('./datos');
 
 const PRODUCTOS = ventas
@@ -85,6 +85,4 @@ function totalPorCiudadI(ventas, c) {
 }, {})
 }
 
-module.exports = {totalVendidoI, ventaMayorI, totalPorCiudadI, generarVentas
-}
-
+module.exports = { totalVendidoI, ventaMayorI, totalPorCiudadI, generarVentas }

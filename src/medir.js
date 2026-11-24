@@ -5,7 +5,7 @@ const { generarVentas,
 
 const { normalizarPalabra, valorVenta } = require('./analitica');
 
-const generdoraContadores = () => ({v: 0, c: 0})
+const generadorContadores = () => ({v: 0, c: 0})
 
 function primeraVenta(ventas, c) {
     const venta = ventas[0];
@@ -15,12 +15,12 @@ function primeraVenta(ventas, c) {
 
 function orquestador(tamanios){
 
-        return tamanios.map((n)=>{
+        return tamanios.map((n) => {
         const ventasOrquestador = generarVentas(n)
-        let c0 = generdoraContadores();
-        let c1 = generdoraContadores(); 
-        let c2 = generdoraContadores(); 
-        let c3 = generdoraContadores(); 
+        let c0 = generadorContadores();
+        let c1 = generadorContadores(); 
+        let c2 = generadorContadores(); 
+        let c3 = generadorContadores(); 
         
         primeraVenta(ventasOrquestador, c0);
         totalVendidoI(ventasOrquestador, c1);
@@ -37,8 +37,6 @@ function orquestador(tamanios){
     })
 }
 
-//console.table(orquestador([100, 1000, 10000, 100000]))
-
 function clientesRecurrentes(ventas) {
     const recurrentes = [];
 
@@ -49,8 +47,7 @@ function clientesRecurrentes(ventas) {
             }
         }
     }
-
-  return recurrentes;
+    return recurrentes;
 }
 
 function tiempos(tamanios){
@@ -60,11 +57,6 @@ function tiempos(tamanios){
         console.timeEnd();
     }
 }
-
-//tiempos([13000])
-
-/*MINIRETO7 SEMANA1 */
-const ventas = generarVentas(10000)
 
 function totalCiudadCadena(ventas, ciudad)  {
     const ciudadNor = normalizarPalabra(ciudad)
@@ -87,7 +79,4 @@ function totalCiudadUnaPasada(ventas, ciudad){
     return total
 }
 
-console.log(totalCiudadCadena(ventas, "medellin"));
-console.log(totalCiudadUnaPasada(ventas, "medellin"));
-
-module.exports = { generdoraContadores }
+module.exports = { generadorContadores }
