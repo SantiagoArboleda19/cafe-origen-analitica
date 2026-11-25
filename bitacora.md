@@ -968,3 +968,72 @@ Complejidad temporal: O(n) -> Dos recorridos de O(n) que equivalen a 2 O(n), eli
 Complejidad espacial: En el peor caso O(n) -> Genera un diccionario de la clase Map del tamaño de la cantidad de clientes.
 ```
 
+## Minireto 11 (Semana 1): La `mejor racha` y el `presupuesto exacto`
+
+### Complejidad **mejorSemanaBruta(dias, k):** Dos ciclos anidados -> O(n * K) pero O(n^2) en el peor de los casos. 
+
+### 11.3 Comprobación y tiempos (k = 7)
+
+| Datos | `mejorSemanaBruta` | `mejorSemana` | ¿Coinciden? |
+| --- | --- | --- | :---: |
+| Septiembre (`ventasDiarias`) | `{ maximo: 3670, indice: 23, valor: 440 }` | `{ maximo: 3670, indice: 23, valor: 440 }` | Sí |
+| 100.000 días al azar | `{ maximo: 6468, indice: 19468, valor: 856 }` | `{ maximo: 6468, indice: 19468, valor: 856 }` | Sí |
+
+| Datos | `mejorSemanaBruta` | `mejorSemana` | Veces más rápida la ventana |
+| --- | ---: | ---: | ---: |
+| Septiembre | 0,733 ms | 0,323 ms | ≈ 2,3 |
+| 100.000 días | 1,971 ms | 0,735 ms | ≈ 2,7 |
+
+La comprobación detectó un error en la fuerza bruta: el ciclo usaba `i < dias.length - k` y no revisaba la última semana, así que devolvía 3.660 (índice 22) en lugar de 3.670 (índice 23). Se corrigió con `i <= dias.length - k`.
+
+La ventana deslizante tarda entre 2 y 3 veces menos. La diferencia es moderada porque k es pequeño: con k = 7 la fuerza bruta hace 7 sumas por semana y la ventana hace una. Como la fuerza bruta es O(n · k) y la ventana O(n), la diferencia crece al aumentar k. Cada tiempo es de una sola corrida, así que tiene algo de ruido.
+
+### 11.4 Comprobación y tiempos (k = 4)
+
+| Datos | `mejorSemanaBruta` | `mejorSemana` | ¿Coinciden? |
+| --- | --- | --- | :---: |
+| Septiembre (`ventasDiarias`) | `{ maximo: 2460, indice: 24, valor: 500 }` | `{ maximo: 2460, indice: 24, valor: 500 }` | Sí |
+| 100.000 días al azar | `{ maximo: 3918, indice: 98007, valor: 993 }` | `{ maximo: 3918, indice: 98007, valor: 993 }` | Sí |
+
+| Datos | `mejorSemanaBruta` | `mejorSemana` |
+| --- | ---: | ---: |
+| Septiembre | 0,602 ms | 0,316 ms |
+| 100.000 días | 1,542 ms | 0,776 ms |
+
+Las dos versiones devuelven la misma mejor semana en ambos casos, y la ventana deslizante tarda cerca de la mitad del tiempo.
+
+Con k = 4 la diferencia es de solo unas 2 veces, porque la fuerza bruta hace n · 4 sumas y la ventana hace n. Como la fuerza bruta es O(n · k), la diferencia crece al aumentar k. Cada tiempo es de una sola corrida, así que tiene algo de ruido.
+
+### 11.6 Pruebas y traza de `parMasCercano`
+
+| Presupuesto | Resultado | Suma |
+| ---: | --- | ---: |
+| 100.000 | Filtros de papel x100 (18.000) + Origen Huila 1 kg (79.000) | 97.000 |
+| 140.000 | Origen Sierra 500 g (45.000) + Prensa francesa (95.000) | 140.000 |
+| 40.000 | `null` (la pareja más barata cuesta 44.000) | n/a |
+
+#### Traza de los punteros para 100.000
+
+Precios ordenados de menor a mayor (posiciones 0 a 7): 18.000, 26.000, 35.000, 42.000, 45.000, 79.000, 95.000, 120.000. `izq` empieza en 0 y `der` en 7. Si la suma supera el presupuesto, baja `der`; si no, anota la suma si es la mejor y sube `izq`.
+
+| Paso | `izq` | `der` | Precio `izq` | Precio `der` | Suma | ¿≤ 100.000? | Acción | Mejor hasta ahora |
+| ---: | ---: | ---: | ---: | ---: | ---: | :---: | --- | ---: |
+| 1 | 0 | 7 | 18.000 | 120.000 | 138.000 | No | `der--` | n/a |
+| 2 | 0 | 6 | 18.000 | 95.000 | 113.000 | No | `der--` | n/a |
+| 3 | 0 | 5 | 18.000 | 79.000 | 97.000 | Sí | Nuevo mejor, `izq++` | 97.000 |
+| 4 | 1 | 5 | 26.000 | 79.000 | 105.000 | No | `der--` | 97.000 |
+| 5 | 1 | 4 | 26.000 | 45.000 | 71.000 | Sí | No mejora, `izq++` | 97.000 |
+| 6 | 2 | 4 | 35.000 | 45.000 | 80.000 | Sí | No mejora, `izq++` | 97.000 |
+| 7 | 3 | 4 | 42.000 | 45.000 | 87.000 | Sí | No mejora, `izq++` | 97.000 |
+
+Los punteros se cruzan (`izq` llega a 4, igual que `der`) y termina. Resultado: 18.000 + 79.000 = 97.000, con 7 pasos en lugar de revisar las 28 parejas.
+
+### 11.7 Clasificación de la complejidad
+
+| Función | Tiempo | Espacio | Por qué |
+| --- | --- | --- | --- |
+| `mejorSemanaBruta` | O(n · k); en el peor caso (k ≈ n/2) es O(n²) | O(1) | Suma k días por cada una de las n − k + 1 semanas |
+| `mejorSemana` | O(n) | O(1) | Un solo recorrido: suma el día que entra y resta el que sale |
+| `parMasCercano` | O(n log n) | O(n) | Ordenar cuesta O(n log n), el recorrido con dos punteros cuesta O(n) y la copia del arreglo ocupa O(n) |
+
+**Costo de ordenar:** en `parMasCercano`, el recorrido con dos punteros es lineal, pero ordenar los precios cuesta O(n log n). Al sumar ambos domina el término de mayor crecimiento, por lo que la función completa es O(n log n). Aun así es mejor que probar todas las parejas (O(n²)). Si los precios llegaran ya ordenados, el costo bajaría a O(n).

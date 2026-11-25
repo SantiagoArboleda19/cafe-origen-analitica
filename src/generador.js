@@ -85,4 +85,4 @@ function totalPorCiudadI(ventas, c) {
 }, {})
 }
 
-module.exports = { totalVendidoI, ventaMayorI, totalPorCiudadI, generarVentas }
+module.exports = { totalVendidoI, ventaMayorI, totalPorCiudadI, generarVentas, numeroAlAzar }
