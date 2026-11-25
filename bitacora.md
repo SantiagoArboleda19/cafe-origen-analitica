@@ -796,7 +796,7 @@ La cadena (`map`, `filter`, `map`, `reduce`) se lee como una receta, pero es má
 
 **Observación 4: pendiente de verificar.** Se revisará el código actual de `ticketPromedio` contra la traza del Minireto 2. Si no coinciden, se corregirá la que esté desactualizada.
 
-## Minireto 9 (Semana 2): Optimización de `clientesRecurrentes` con `Set` y `Map`
+## Minireto 9 (Semana 1): Optimización de `clientesRecurrentes` con `Set` y `Map`
 
 ### 9.1 Objetivo
 
@@ -917,3 +917,54 @@ c es la cantidad de clientes distintos.
 ### 9.7 Conclusión
 
 Guardar los clientes que ya aparecieron evita volver a buscarlos en cada comparación, y baja `clientesRecurrentes` de O(n²) a O(n). Con 100.000 ventas, el reporte pasa de casi 46 segundos a menos de 60 milisegundos, y con 1.000.000 pasaría de más de una hora a menos de un segundo. `Set` y `Map` rinden igual, así que la elección depende de lo que se necesite: `Map` además guarda cuántas compras hizo cada cliente.
+
+## Minireto 10 (Semana 1): Clasificación de `complejidad algoritmica` de tres funciones.
+
+### Pruebas y traza de `comboRegaloMap`
+
+| Valor | Resultado |
+| ---: | --- |
+| 87.000 | Origen Sierra 500 g + Origen Huila 500 g |
+| 61.000 | Taza de cerámica + Origen Nariño 250 g |
+| 7.000 | `null` (menor que el precio de cualquier producto) |
+
+#### Traza para 87.000
+
+El `Map` guarda `precio → producto` de los productos ya revisados. Para cada producto se calcula el complemento (87.000 − precio) y se pregunta si ya está en el `Map`.
+
+| Paso | Producto | Precio | Complemento | ¿Está en el `Map`? | `Map` antes de revisar | Acción |
+| ---: | --- | ---: | ---: | :---: | --- | --- |
+| 1 | Origen Nariño 250 g | 26.000 | 61.000 | No | vacío | Guarda 26.000 |
+| 2 | Origen Huila 500 g | 42.000 | 45.000 | No | 26.000 | Guarda 42.000 |
+| 3 | Origen Sierra 500 g | 45.000 | 42.000 | **Sí** | 26.000, 42.000 | Devuelve la pareja |
+
+Resultado: `{ productoUno: "Origen Sierra 500 g", productoDos: "Origen Huila 500 g" }`, y 45.000 + 42.000 = 87.000.
+
+La función termina en el paso 3 sin revisar los otros 5 productos. Cada producto se consulta una sola vez, por eso es O(n) en tiempo, frente a O(n²) de la fuerza bruta.
+
+#### Clasificación de `complejidad algoritmica` de tres funciones.
+
+Función **comboRegaloMap(productos):**
+
+```
+Complejidad temporal: O(n) -> Solo hace un recorrido.
+
+Complejidad espacial: En el peor caso O(n), tiende a O(1) -> Genera un diccionario de la clase Map del tamaño de los precios sin repeticiones.
+```
+
+Función **productoEstrellaPorCiudad(ventas):**
+
+```
+Complejidad temporal: O(n) -> Dos recorridos de O(n) que equivalena a 2 O(n), eliminando la constante tenemos O(n).
+
+Complejidad espacial: En el peor caso O(n) -> Genera un diccionario de la clase Map del tamaño de la cantidad de ciudades con un Map anidado.
+```
+
+Función **primerClienteUnico(ventas):**
+
+```
+Complejidad temporal: O(n) -> Dos recorridos de O(n) que equivalen a 2 O(n), eliminando la constante tenemos O(n).
+
+Complejidad espacial: En el peor caso O(n) -> Genera un diccionario de la clase Map del tamaño de la cantidad de clientes.
+```
+
